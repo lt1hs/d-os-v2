@@ -17,6 +17,7 @@ import { WebApps } from './components/apps/WebApps';
 import { ToDo } from './components/apps/ToDo';
 import { UserProfile } from './components/apps/UserProfile';
 import { Terminal } from './components/apps/Terminal';
+import { Browser } from './components/apps/Browser';
 import { AppDefinition, ContextMenuItem, Workspace, WindowSnapHint, SystemAction, ShortcutAction, ShortcutMap, Notification, UserProfileState, Project, CreativeAppProps, WindowState } from './types';
 import { APPS, SYSTEM_TOOLS, mockFolders } from './constants';
 import { THEME_SETTINGS, DEFAULT_THEME, Theme } from './constants/theme';
@@ -548,6 +549,7 @@ const App: React.FC = () => {
             case 'file-explorer': return <FileExplorer setContextMenu={setContextMenu} pinnedFolders={pinnedFolders} onTogglePin={handleTogglePinFolder} />;
             case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} />;
             case 'todo': return <ToDo />;
+            case 'browser': return <Browser />;
             case 'user-profile': return <UserProfile userProfile={userProfile} setUserProfile={setUserProfile} setUserPassword={setUserPassword} />;
             case 'secret-terminal': return <Terminal userProfile={userProfile} onClose={() => closeApp('secret-terminal')} />;
             default: return <ComingSoon app={app} />;

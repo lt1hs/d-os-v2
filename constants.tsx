@@ -49,6 +49,11 @@ export const APPS: AppDefinition[] = [
         icon: <i className="fi fi-rr-apps" />,
     },
     {
+        id: 'browser',
+        name: 'Web Browser',
+        icon: <i className="fi fi-rr-globe" />,
+    },
+    {
         id: 'todo',
         name: 'To-Do',
         icon: <i className="fi fi-rr-list-check" />,

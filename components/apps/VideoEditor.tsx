@@ -40,8 +40,11 @@ export const VideoEditor: React.FC<CreativeAppProps> = (props) => {
     // Refs
     const timelineContainerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const animationFrameRef = useRef<number>();
-    const lastTimeRef = useRef<number>();
+    // FIX: Initialize useRef with null and update the types to allow null.
+    // This resolves the TypeScript error "Expected 1 arguments, but got 0"
+    // by ensuring the correct useRef overload is used for both refs.
+    const animationFrameRef = useRef<number | null>(null);
+    const lastTimeRef = useRef<number | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // AI Tools State

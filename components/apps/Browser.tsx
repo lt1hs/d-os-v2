@@ -11,20 +11,22 @@ export const Browser: React.FC = () => {
     const navigate = (url: string, addToHistory: boolean = true) => {
         let finalUrl = url;
         if (!/^https?:\/\//i.test(url)) {
-            finalUrl = `https://${url}`;
+            if (url.includes('.') && !url.includes(' ')) {
+                 finalUrl = `https://${url}`;
+            } else {
+                finalUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+            }
         }
         
         setInputValue(finalUrl);
 
         if (addToHistory) {
             const newHistory = history.slice(0, historyIndex + 1);
-            // Avoid adding duplicate entries if user re-submits same URL
             if (newHistory[newHistory.length - 1] !== finalUrl) {
                 newHistory.push(finalUrl);
                 setHistory(newHistory);
                 setHistoryIndex(newHistory.length - 1);
             } else {
-                // If it is the same URL, just refresh
                 refresh();
             }
         }
@@ -59,7 +61,6 @@ export const Browser: React.FC = () => {
 
     const refresh = () => {
         if (iframeRef.current) {
-            // A common trick to force iframe reload
             iframeRef.current.src = iframeRef.current.src;
         }
     };

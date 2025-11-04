@@ -77,6 +77,7 @@ export type ShortcutAction =
   | 'openApp:copy-studio'
   | 'openApp:podcast-studio'
   | 'openApp:webapps-store'
+  | 'openApp:browser'
   | 'openApp:todo'
   | 'openApp:file-explorer'
   | 'openApp:settings'
