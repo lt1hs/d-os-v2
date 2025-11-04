@@ -1,8 +1,10 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { THEME_SETTINGS, Theme } from '../../constants/theme';
 import { APPS, SYSTEM_TOOLS } from '../../constants';
-import { ShortcutMap, ShortcutAction } from '../../types';
+// FIX: Import `AppDefinition` type to resolve the type error.
+import { ShortcutMap, ShortcutAction, AppDefinition } from '../../types';
 import { SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS } from '../../constants/shortcuts';
 
 
@@ -33,6 +35,8 @@ interface SettingsProps {
     setFileSyncSettings: React.Dispatch<React.SetStateAction<FileSyncSettingsState>>;
     shortcutMap: ShortcutMap;
     setShortcutMap: React.Dispatch<React.SetStateAction<ShortcutMap>>;
+    dockOrder: string[];
+    setDockOrder: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 type Category = 'appearance' | 'background' | 'dock' | 'collaboration' | 'file-sync' | 'shortcuts' | 'about';
@@ -70,7 +74,7 @@ const NavButton: React.FC<{
     </button>
 );
 
-export const Settings: React.FC<SettingsProps> = ({ theme, setTheme, dockSettings, setDockSettings, collaborationSettings, setCollaborationSettings, fileSyncSettings, setFileSyncSettings, shortcutMap, setShortcutMap }) => {
+export const Settings: React.FC<SettingsProps> = ({ theme, setTheme, dockSettings, setDockSettings, collaborationSettings, setCollaborationSettings, fileSyncSettings, setFileSyncSettings, shortcutMap, setShortcutMap, dockOrder, setDockOrder }) => {
     const [activeCategory, setActiveCategory] = useState<Category>('appearance');
 
     return (
@@ -89,7 +93,7 @@ export const Settings: React.FC<SettingsProps> = ({ theme, setTheme, dockSetting
             <main className="flex-1 p-8 overflow-y-auto min-w-0">
                 {activeCategory === 'appearance' && <AppearanceSettings theme={theme} setTheme={setTheme} />}
                 {activeCategory === 'background' && <BackgroundSettings theme={theme} setTheme={setTheme} />}
-                {activeCategory === 'dock' && <DockSettings dockSettings={dockSettings} setDockSettings={setDockSettings} />}
+                {activeCategory === 'dock' && <DockSettings dockSettings={dockSettings} setDockSettings={setDockSettings} dockOrder={dockOrder} setDockOrder={setDockOrder} />}
                 {activeCategory === 'collaboration' && <CollaborationSettings settings={collaborationSettings} setSettings={setCollaborationSettings} />}
                 {activeCategory === 'file-sync' && <FileSyncSettings settings={fileSyncSettings} setSettings={setFileSyncSettings} />}
                 {activeCategory === 'shortcuts' && <ShortcutsSettings shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} />}
@@ -187,7 +191,10 @@ const BackgroundSettings: React.FC<Pick<SettingsProps, 'theme' | 'setTheme'>> = 
     );
 };
 
-const DockSettings: React.FC<Pick<SettingsProps, 'dockSettings' | 'setDockSettings'>> = ({ dockSettings, setDockSettings }) => {
+const DockSettings: React.FC<Pick<SettingsProps, 'dockSettings' | 'setDockSettings' | 'dockOrder' | 'setDockOrder'>> = ({ dockSettings, setDockSettings, dockOrder, setDockOrder }) => {
+    const dragItem = useRef<number | null>(null);
+    const dragOverItem = useRef<number | null>(null);
+
     const handleAppToggle = (appId: string, isVisible: boolean) => {
         setDockSettings(prev => ({
             ...prev,
@@ -199,27 +206,96 @@ const DockSettings: React.FC<Pick<SettingsProps, 'dockSettings' | 'setDockSettin
         setDockSettings(prev => ({ ...prev, showSystemTools: isVisible }));
     };
 
+    const orderedMainApps = useMemo(() => {
+        const mainAppIds = new Set(APPS.map(app => app.id));
+        const filteredDockOrder = dockOrder.filter(id => mainAppIds.has(id));
+        return filteredDockOrder.map(id => APPS.find(app => app.id === id)).filter(Boolean) as (AppDefinition[]);
+    }, [dockOrder]);
+    
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, position: number) => {
+        dragItem.current = position;
+        e.currentTarget.classList.add('opacity-50');
+    };
+
+    const handleDragEnter = (_e: React.DragEvent<HTMLDivElement>, position: number) => {
+        dragOverItem.current = position;
+    };
+    
+    const handleDrop = () => {
+        if (dragItem.current === null || dragOverItem.current === null) return;
+        
+        const newOrderedIds = [...orderedMainApps.map(app => app.id)];
+        const [draggedItem] = newOrderedIds.splice(dragItem.current, 1);
+        newOrderedIds.splice(dragOverItem.current, 0, draggedItem);
+        
+        const systemToolIdsInOrder = SYSTEM_TOOLS.map(t => t.id).filter(id => dockOrder.includes(id));
+        setDockOrder([...newOrderedIds, ...systemToolIdsInOrder]);
+
+        dragItem.current = null;
+        dragOverItem.current = null;
+    };
+    
+    const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+        e.currentTarget.classList.remove('opacity-50');
+        dragItem.current = null;
+        dragOverItem.current = null;
+    };
+
+    const handleResetOrder = () => {
+        setDockOrder(APPS.map(app => app.id));
+    };
+
     return (
         <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold mb-1">Dock Management</h2>
-            <p className="text-sm text-slate-400 mb-8">Customize your sidebar dock.</p>
-
-            <div className="bg-slate-800/50 p-4 rounded-lg mb-6">
-                 <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-md font-semibold">Show System Tools</h3>
-                        <p className="text-sm text-slate-400">Toggle visibility for File Explorer, Settings, and Trash.</p>
-                    </div>
-                    <ToggleSwitch checked={dockSettings.showSystemTools} onChange={handleSystemToolsToggle} />
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h2 className="text-2xl font-bold mb-1">Dock Management</h2>
+                    <p className="text-sm text-slate-400">Customize your dock's appearance and app order.</p>
+                </div>
+                 <button onClick={handleResetOrder} className="px-3 py-1.5 bg-white/10 text-white/80 text-xs font-semibold rounded-md hover:bg-white/20">Reset to Default</button>
+            </div>
+            
+            <div className="bg-slate-800/50 p-4 rounded-lg">
+                <h3 className="text-md font-semibold mb-3">Application Order & Visibility</h3>
+                <p className="text-sm text-slate-400 mb-4">Drag to reorder applications. Use the toggle to show or hide them.</p>
+                <div className="space-y-2">
+                    {orderedMainApps.map((app, index) => (
+                        <div 
+                            key={app.id}
+                            className="flex items-center justify-between p-2 rounded-lg bg-slate-700/50 cursor-grab active:cursor-grabbing"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragEnter={(e) => handleDragEnter(e, index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={handleDrop}
+                        >
+                            <div className="flex items-center gap-3">
+                                <i className="fi fi-rr-menu-dots-vertical text-slate-400"></i>
+                                <div className="w-6 h-6 text-xl text-slate-300">{app.icon}</div>
+                                <span className="font-medium text-sm">{app.name}</span>
+                            </div>
+                            <ToggleSwitch
+                                checked={!!dockSettings.visibleApps[app.id]}
+                                onChange={(isChecked) => handleAppToggle(app.id, isChecked)}
+                            />
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            <div className="bg-slate-800/50 p-4 rounded-lg">
-                 <h3 className="text-md font-semibold mb-3">Application Visibility</h3>
-                <p className="text-sm text-slate-400 mb-4">Choose which applications appear in your dock.</p>
-                 <div className="space-y-3">
-                    {[...APPS, ...SYSTEM_TOOLS].map(app => (
-                        <div key={app.id} className="flex items-center justify-between">
+            <div className="bg-slate-800/50 p-4 rounded-lg mt-6">
+                <h3 className="text-md font-semibold mb-3">System Tools Visibility</h3>
+                <div className="space-y-3">
+                     <div className="flex items-center justify-between">
+                        <div>
+                            <h4 className="text-sm font-semibold">Show All System Tools in Dock</h4>
+                            <p className="text-xs text-slate-400">Toggle File Explorer, Settings, and Trash.</p>
+                        </div>
+                        <ToggleSwitch checked={dockSettings.showSystemTools} onChange={handleSystemToolsToggle} />
+                    </div>
+                    {SYSTEM_TOOLS.map(app => (
+                        <div key={app.id} className="flex items-center justify-between pl-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-6 h-6 text-xl text-slate-300">{app.icon}</div>
                                 <span className="font-medium text-sm">{app.name}</span>
@@ -230,7 +306,7 @@ const DockSettings: React.FC<Pick<SettingsProps, 'dockSettings' | 'setDockSettin
                             />
                         </div>
                     ))}
-                 </div>
+                </div>
             </div>
         </div>
     );

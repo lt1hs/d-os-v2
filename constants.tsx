@@ -44,6 +44,11 @@ export const APPS: AppDefinition[] = [
         icon: <i className="fi fi-rr-microphone" />,
     },
     {
+        id: 'code-studio',
+        name: 'Code Studio',
+        icon: <i className="fi fi-rr-file-code" />,
+    },
+    {
         id: 'webapps-store',
         name: 'WebApps Store',
         icon: <i className="fi fi-rr-apps" />,

@@ -10,6 +10,7 @@ import { DesignStudio } from './components/apps/DesignStudio';
 import { CopyStudio } from './components/apps/CopyStudio';
 import { AudioStudio } from './components/apps/AudioStudio';
 import { PodcastStudio } from './components/apps/PodcastStudio';
+import { CodeStudio } from './components/apps/CodeStudio';
 import { FileExplorer } from './components/apps/FileExplorer';
 import { Settings } from './components/apps/Settings';
 import { ComingSoon } from './components/apps/ComingSoon';
@@ -35,7 +36,7 @@ import { AsciiBackground } from './components/AsciiBackground';
 const ALL_APPS = [...APPS, ...SYSTEM_TOOLS];
 const TOP_BAR_HEIGHT = 56;
 const DOCK_HEIGHT = 64; // Adjusted for smaller dock
-const CREATIVE_APP_IDS = ['image-studio', 'video-studio', 'video-editor', 'design-studio', 'copy-studio', 'audio-studio', 'podcast-studio'];
+const CREATIVE_APP_IDS = ['image-studio', 'video-studio', 'video-editor', 'design-studio', 'copy-studio', 'audio-studio', 'podcast-studio', 'code-studio'];
 const DEFAULT_AVATAR = 'https://i.imgur.com/3f8n1fX.png';
 
 
@@ -119,6 +120,20 @@ const App: React.FC = () => {
             visibleApps: ALL_APPS.reduce((acc, app) => ({...acc, [app.id]: true}), {}),
             showSystemTools: true,
         };
+    });
+    
+    const [dockOrder, setDockOrder] = useState<string[]>(() => {
+        try {
+            const saved = localStorage.getItem('ai-studio-dock-order');
+            if (saved) {
+                const parsedOrder = JSON.parse(saved);
+                const appIds = APPS.map(app => app.id);
+                const currentAppIds = new Set(parsedOrder);
+                const missingAppIds = appIds.filter(id => !currentAppIds.has(id));
+                return [...parsedOrder, ...missingAppIds];
+            }
+        } catch (e) { console.error(e) }
+        return APPS.map(app => app.id);
     });
 
     const [pinnedFolders, setPinnedFolders] = useState<string[]>(() => {
@@ -207,6 +222,7 @@ const App: React.FC = () => {
         localStorage.setItem('ai-studio-active-workspace', activeWorkspaceId);
         localStorage.setItem('ai-studio-theme', JSON.stringify(theme));
         localStorage.setItem('ai-studio-dock-settings', JSON.stringify(dockSettings));
+        localStorage.setItem('ai-studio-dock-order', JSON.stringify(dockOrder));
         localStorage.setItem('ai-studio-pinned-folders', JSON.stringify(pinnedFolders));
         localStorage.setItem('ai-studio-connected-web-apps', JSON.stringify(Array.from(connectedWebApps)));
         localStorage.setItem('ai-studio-user-profile', JSON.stringify(userProfile));
@@ -214,7 +230,7 @@ const App: React.FC = () => {
         localStorage.setItem('ai-studio-file-sync-settings', JSON.stringify(fileSyncSettings));
         localStorage.setItem('ai-studio-shortcuts', JSON.stringify(shortcutMap));
         localStorage.setItem('ai-studio-notifications', JSON.stringify(notifications));
-    }, [workspaces, activeWorkspaceId, theme, dockSettings, pinnedFolders, connectedWebApps, userProfile, collaborationSettings, fileSyncSettings, shortcutMap, notifications, projects]);
+    }, [workspaces, activeWorkspaceId, theme, dockSettings, dockOrder, pinnedFolders, connectedWebApps, userProfile, collaborationSettings, fileSyncSettings, shortcutMap, notifications, projects]);
     
     // Sync user profile changes with collaboration settings
     useEffect(() => {
@@ -540,6 +556,7 @@ const App: React.FC = () => {
                 case 'podcast-studio': return <PodcastStudio {...creativeAppProps} />;
                 case 'design-studio': return <DesignStudio {...creativeAppProps} />;
                 case 'copy-studio': return <CopyStudio {...creativeAppProps} />;
+                case 'code-studio': return <CodeStudio {...creativeAppProps} />;
                 default: return <ComingSoon app={app} />;
             }
         }
@@ -547,7 +564,7 @@ const App: React.FC = () => {
         switch (app.id) {
             case 'webapps-store': return <WebApps connectedApps={connectedWebApps} setConnectedApps={setConnectedWebApps} />;
             case 'file-explorer': return <FileExplorer setContextMenu={setContextMenu} pinnedFolders={pinnedFolders} onTogglePin={handleTogglePinFolder} />;
-            case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} />;
+            case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} dockOrder={dockOrder} setDockOrder={setDockOrder} />;
             case 'todo': return <ToDo />;
             case 'browser': return <Browser />;
             case 'user-profile': return <UserProfile userProfile={userProfile} setUserProfile={setUserProfile} setUserPassword={setUserPassword} />;
@@ -662,6 +679,7 @@ const App: React.FC = () => {
                     onStartClick={() => setIsStartMenuOpen(p => !p)}
                     animatingIcon={animatingIcon}
                     dockSettings={dockSettings}
+                    dockOrder={dockOrder}
                     pinnedFolders={pinnedFolders.map(id => mockFolders.find(f => f.id === id)).filter(Boolean) as any[]}
                     onPinnedFolderClick={(folderId) => openApp('file-explorer', { folderId })}
                     onCloseApp={closeApp}

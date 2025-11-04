@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useMemo } from 'react';
 import { AppDefinition, ContextMenuItem } from '../types';
 import { DockIcon } from './DockIcon';
@@ -17,6 +18,7 @@ interface DockProps {
         visibleApps: Record<string, boolean>;
         showSystemTools: boolean;
     };
+    dockOrder: string[];
     pinnedFolders: CloudFolder[];
     onPinnedFolderClick: (folderId: string) => void;
     onCloseApp: (id: string) => void;
@@ -33,13 +35,18 @@ export const Dock: React.FC<DockProps> = (props) => {
         apps, systemTools, onAppClick, openApps, activeApp, minimizedApps, 
         onStartClick, animatingIcon, dockSettings, pinnedFolders, 
         onPinnedFolderClick, onCloseApp, onMinimizeApp, 
-        onTogglePin, setContextMenu 
+        onTogglePin, setContextMenu, dockOrder
     } = props;
     
     const dockRef = useRef<HTMLDivElement>(null);
     const [mouseX, setMouseX] = useState<number | null>(null);
 
-    const visibleApps = useMemo(() => apps.filter(app => dockSettings.visibleApps[app.id]), [apps, dockSettings]);
+    const visibleApps = useMemo(() => {
+        const visibleAppIds = new Set(apps.filter(app => dockSettings.visibleApps[app.id]).map(app => app.id));
+        const orderedVisibleAppIds = dockOrder.filter(id => visibleAppIds.has(id));
+        return orderedVisibleAppIds.map(id => apps.find(app => app.id === id)).filter(Boolean) as AppDefinition[];
+    }, [apps, dockSettings, dockOrder]);
+
     const visibleSystemTools = useMemo(() => systemTools.filter(tool => dockSettings.visibleApps[tool.id]), [systemTools, dockSettings]);
 
     const dockItems = useMemo(() => [

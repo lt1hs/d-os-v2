@@ -27,6 +27,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
     'openApp:design-studio': 'mod+5',
     'openApp:copy-studio': 'mod+6',
     'openApp:podcast-studio': '',
+    'openApp:code-studio': 'mod+shift+c',
     'openApp:webapps-store': 'mod+7',
     'openApp:browser': 'mod+b',
     'openApp:todo': 'mod+8',
