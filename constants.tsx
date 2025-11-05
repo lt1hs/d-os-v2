@@ -17,6 +17,11 @@ export const APPS: AppDefinition[] = [
         icon: <i className="fi fi-rr-head-side-thinking" />,
     },
     {
+        id: 'workflow-studio',
+        name: 'Workflow Studio',
+        icon: <i className="fi fi-rr-diagram-project" />,
+    },
+    {
         id: 'image-studio',
         name: 'Image Studio',
         icon: <i className="fi fi-rr-images" />,

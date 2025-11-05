@@ -104,6 +104,7 @@ export type ShortcutAction =
   | 'lockScreen'
   | 'openSearch'
   | 'openApp:agent-studio'
+  | 'openApp:workflow-studio'
   | 'openApp:image-studio'
   | 'openApp:video-studio'
   | 'openApp:video-editor'
@@ -187,4 +188,41 @@ export interface Agent {
   name: string;
   type: AgentType;
   config: VoiceAgentConfig | WebChatAgentConfig | {}; // Empty object for social for now
+}
+
+// Workflow Studio Types
+export interface NodeInput {
+  id: string;
+  name: string;
+  type: 'string' | 'object' | 'any';
+}
+
+export interface NodeOutput {
+  id: string;
+  name: string;
+  type: 'string' | 'object' | 'any';
+}
+
+export interface NodeDefinition {
+  type: string;
+  name: string;
+  description: string;
+  inputs: NodeInput[];
+  outputs: NodeOutput[];
+  hasSettings: boolean;
+}
+
+export interface WorkflowNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: Record<string, any>;
+}
+
+export interface WorkflowEdge {
+  id: string;
+  source: string;
+  sourceHandle: string;
+  target: string;
+  targetHandle: string;
 }

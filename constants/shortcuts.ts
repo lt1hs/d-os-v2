@@ -21,6 +21,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
     'openSearch': 'mod+k',
     'lockScreen': 'mod+l',
     'openApp:agent-studio': 'mod+alt+a',
+    'openApp:workflow-studio': '',
     'openApp:image-studio': 'mod+1',
     'openApp:video-studio': 'mod+2',
     'openApp:video-editor': 'mod+3',
