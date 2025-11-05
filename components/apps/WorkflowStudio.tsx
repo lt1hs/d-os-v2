@@ -10,7 +10,7 @@ const NODE_DEFINITIONS: NodeDefinition[] = [
     { type: 'videoStudio', name: 'Video Studio', description: 'Generates a video from a prompt.', inputs: [{ id: 'prompt', name: 'Prompt', type: 'string' }], outputs: [{ id: 'videoUrl', name: 'Video URL', type: 'string' }], hasSettings: true },
     { type: 'audioStudio', name: 'Audio Studio', description: 'Generates speech from text.', inputs: [{ id: 'text', name: 'Text', type: 'string' }], outputs: [{ id: 'audioBase64', name: 'Audio (Base64)', type: 'string' }], hasSettings: true },
     { type: 'copyStudioSocialPost', name: 'Social Post', description: 'Generates a social media post.', inputs: [{ id: 'prompt', name: 'Prompt', type: 'string' }], outputs: [{ id: 'postData', name: 'Post Data', type: 'object' }], hasSettings: true },
-    { type: 'copyStudioBlogPost', name: 'Blog Post', description: 'Generates a full blog post.', inputs: [{ id: 'topic', name: 'Topic', type: 'string' }], outputs: [{ id: 'blogData', name: 'Blog Data', type: 'object' }], hasSettings: false },
+    { type: 'copyStudioBlogPost', name: 'Blog Post', description: 'Generates a full blog post.', inputs: [{ id: 'topic', name: 'Topic', type: 'string' }], outputs: [{ id: 'blogData', name: 'Blog Data', type: 'object' }], hasSettings: true },
     { type: 'resultViewer', name: 'Result Viewer', description: 'Displays any connected output.', inputs: [{ id: 'data', name: 'Data', type: 'any' }], outputs: [], hasSettings: false },
 ];
 
@@ -147,11 +147,33 @@ export const WorkflowStudio: React.FC = () => {
         };
         
         const newNode: WorkflowNode = { id: `node-${Date.now()}`, type, position, data: {} };
-        if (type === 'textInput') newNode.data.text = 'Your text here...';
-        if (type === 'copyStudioSocialPost') newNode.data.platform = PLATFORMS[0];
-        if (type === 'imageStudio') newNode.data.aspectRatio = ASPECT_RATIOS.image[0];
-        if (type === 'videoStudio') { newNode.data.aspectRatio = ASPECT_RATIOS.video[0]; newNode.data.resolution = "720p"; }
-        if (type === 'audioStudio') newNode.data.voice = VOICES[0];
+        
+        // Add default data for nodes with settings
+        switch (type) {
+            case 'textInput':
+                newNode.data.text = 'A futuristic city skyline at dusk, with flying cars and neon lights.';
+                break;
+            case 'copyStudioSocialPost':
+                newNode.data.prompt = 'Announcing our new feature!';
+                newNode.data.platform = PLATFORMS[0];
+                break;
+            case 'copyStudioBlogPost':
+                newNode.data.topic = 'The Future of AI';
+                break;
+            case 'imageStudio':
+                newNode.data.prompt = 'A beautiful landscape.';
+                newNode.data.aspectRatio = ASPECT_RATIOS.image[0];
+                break;
+            case 'videoStudio': 
+                newNode.data.prompt = 'A fast-paced action sequence.';
+                newNode.data.aspectRatio = ASPECT_RATIOS.video[0]; 
+                newNode.data.resolution = "720p"; 
+                break;
+            case 'audioStudio':
+                newNode.data.text = 'Hello world!';
+                newNode.data.voice = VOICES[0];
+                break;
+        }
         
         setNodes(prev => [...prev, newNode]);
         setNodeStatus(prev => ({ ...prev, [newNode.id]: 'idle' }));
@@ -276,23 +298,33 @@ export const WorkflowStudio: React.FC = () => {
                         output.text = node.data.text;
                         break;
                     case 'imageStudio':
-                        output.imageBase64 = await geminiService.generateImage(inputs.prompt, node.data.aspectRatio);
+                        const imagePrompt = inputs.prompt || node.data.prompt;
+                        if (!imagePrompt) throw new Error('Image Studio node requires a prompt.');
+                        output.imageBase64 = await geminiService.generateImage(imagePrompt, node.data.aspectRatio);
                         break;
                     case 'videoStudio':
-                        const videoUrl = await geminiService.generateVideo(inputs.prompt, node.data.aspectRatio, node.data.resolution, (msg) => console.log(msg));
+                        const videoPrompt = inputs.prompt || node.data.prompt;
+                        if (!videoPrompt) throw new Error('Video Studio node requires a prompt.');
+                        const videoUrl = await geminiService.generateVideo(videoPrompt, node.data.aspectRatio, node.data.resolution, (msg) => console.log(msg));
                         const response = await fetch(`${videoUrl}&key=${process.env.API_KEY}`);
                         if (!response.ok) throw new Error(`Failed to download video: ${response.statusText}`);
                         const videoBlob = await response.blob();
                         output.videoUrl = URL.createObjectURL(videoBlob);
                         break;
                     case 'audioStudio':
-                        output.audioBase64 = await geminiService.generateSpeech(inputs.text, node.data.voice);
+                        const audioText = inputs.text || node.data.text;
+                        if (!audioText) throw new Error('Audio Studio node requires text.');
+                        output.audioBase64 = await geminiService.generateSpeech(audioText, node.data.voice);
                         break;
                     case 'copyStudioSocialPost':
-                        output.postData = await geminiService.generateSocialPost(inputs.prompt, node.data.platform);
+                        const socialPrompt = inputs.prompt || node.data.prompt;
+                        if (!socialPrompt) throw new Error('Social Post node requires a prompt.');
+                        output.postData = await geminiService.generateSocialPost(socialPrompt, node.data.platform);
                         break;
                     case 'copyStudioBlogPost':
-                        output.blogData = await geminiService.generateBlogPost(inputs.topic);
+                        const blogTopic = inputs.topic || node.data.topic;
+                        if (!blogTopic) throw new Error('Blog Post node requires a topic.');
+                        output.blogData = await geminiService.generateBlogPost(blogTopic);
                         break;
                     case 'resultViewer':
                         // No execution, just displays input
@@ -302,8 +334,9 @@ export const WorkflowStudio: React.FC = () => {
                 setNodeStatus(prev => ({ ...prev, [nodeId]: 'completed' }));
             } catch (error) {
                 console.error(`Error executing node ${nodeId}:`, error);
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
                 setNodeStatus(prev => ({ ...prev, [nodeId]: 'failed' }));
-                setNodeOutputs(prev => ({ ...prev, [nodeId]: { error: error instanceof Error ? error.message : 'Unknown error' } }));
+                setNodeOutputs(prev => ({ ...prev, [nodeId]: { error: errorMessage } }));
                 break; // Stop execution on failure
             }
         }
@@ -345,9 +378,6 @@ export const WorkflowStudio: React.FC = () => {
                 <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`, transformOrigin: 'top left' }}>
                     <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" /></marker></defs>
                     {edges.map(edge => {
-                        // This logic to get handle positions is complex and depends on refs, which is hard here.
-                        // A more robust solution would use a state management library to sync positions.
-                        // For now, we'll approximate.
                         const sourceNode = nodes.find(n => n.id === edge.source);
                         const targetNode = nodes.find(n => n.id === edge.target);
                         if(!sourceNode || !targetNode) return null;
@@ -369,15 +399,25 @@ export const WorkflowStudio: React.FC = () => {
                             </div>
                         )}
                         {selectedNode.type === 'imageStudio' && (
-                             <div>
-                                <label className="text-xs text-slate-400">Aspect Ratio</label>
-                                <select value={selectedNode.data.aspectRatio} onChange={e => updateNodeData(selectedNodeId!, { aspectRatio: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
-                                    {ASPECT_RATIOS.image.map(r => <option key={r} value={r}>{r}</option>)}
-                                </select>
-                            </div>
+                            <>
+                                <div>
+                                    <label className="text-xs text-slate-400">Prompt (Fallback)</label>
+                                    <textarea value={selectedNode.data.prompt} onChange={e => updateNodeData(selectedNodeId!, { prompt: e.target.value })} className="w-full h-24 mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate-400">Aspect Ratio</label>
+                                    <select value={selectedNode.data.aspectRatio} onChange={e => updateNodeData(selectedNodeId!, { aspectRatio: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
+                                        {ASPECT_RATIOS.image.map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+                                </div>
+                            </>
                         )}
                         {selectedNode.type === 'videoStudio' && (
                              <>
+                                <div>
+                                    <label className="text-xs text-slate-400">Prompt (Fallback)</label>
+                                    <textarea value={selectedNode.data.prompt} onChange={e => updateNodeData(selectedNodeId!, { prompt: e.target.value })} className="w-full h-24 mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm" />
+                                </div>
                                 <div>
                                     <label className="text-xs text-slate-400">Aspect Ratio</label>
                                     <select value={selectedNode.data.aspectRatio} onChange={e => updateNodeData(selectedNodeId!, { aspectRatio: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
@@ -393,19 +433,37 @@ export const WorkflowStudio: React.FC = () => {
                              </>
                         )}
                         {selectedNode.type === 'audioStudio' && (
-                            <div>
-                                <label className="text-xs text-slate-400">Voice</label>
-                                <select value={selectedNode.data.voice} onChange={e => updateNodeData(selectedNodeId!, { voice: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
-                                    {VOICES.map(v => <option key={v} value={v}>{v}</option>)}
-                                </select>
-                            </div>
+                             <>
+                                <div>
+                                    <label className="text-xs text-slate-400">Text (Fallback)</label>
+                                    <textarea value={selectedNode.data.text} onChange={e => updateNodeData(selectedNodeId!, { text: e.target.value })} className="w-full h-24 mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate-400">Voice</label>
+                                    <select value={selectedNode.data.voice} onChange={e => updateNodeData(selectedNodeId!, { voice: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
+                                        {VOICES.map(v => <option key={v} value={v}>{v}</option>)}
+                                    </select>
+                                </div>
+                            </>
                         )}
                         {selectedNode.type === 'copyStudioSocialPost' && (
+                             <>
+                                <div>
+                                    <label className="text-xs text-slate-400">Prompt (Fallback)</label>
+                                    <textarea value={selectedNode.data.prompt} onChange={e => updateNodeData(selectedNodeId!, { prompt: e.target.value })} className="w-full h-24 mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate-400">Platform</label>
+                                    <select value={selectedNode.data.platform} onChange={e => updateNodeData(selectedNodeId!, { platform: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
+                                        {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+                                    </select>
+                                </div>
+                            </>
+                        )}
+                         {selectedNode.type === 'copyStudioBlogPost' && (
                             <div>
-                                <label className="text-xs text-slate-400">Platform</label>
-                                <select value={selectedNode.data.platform} onChange={e => updateNodeData(selectedNodeId!, { platform: e.target.value })} className="w-full mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm">
-                                    {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-                                </select>
+                                <label className="text-xs text-slate-400">Topic (Fallback)</label>
+                                <textarea value={selectedNode.data.topic} onChange={e => updateNodeData(selectedNodeId!, { topic: e.target.value })} className="w-full h-24 mt-1 p-2 bg-slate-800 rounded border border-slate-700 text-sm" />
                             </div>
                         )}
                     </div>
