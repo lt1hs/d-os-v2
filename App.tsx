@@ -20,6 +20,7 @@ import { UserProfile } from './components/apps/UserProfile';
 import { Terminal } from './components/apps/Terminal';
 import { Browser } from './components/apps/Browser';
 import { MediaPlayer } from './components/apps/MediaPlayer';
+import { FileViewer } from './components/apps/FileViewer';
 import { AppDefinition, ContextMenuItem, Workspace, WindowSnapHint, SystemAction, ShortcutAction, ShortcutMap, Notification, UserProfileState, Project, CreativeAppProps, WindowState, CloudFile, MediaState } from './types';
 import { APPS, SYSTEM_TOOLS, mockFolders, mockFiles } from './constants';
 import { THEME_SETTINGS, DEFAULT_THEME, Theme } from './constants/theme';
@@ -312,13 +313,12 @@ const App: React.FC = () => {
         updateActiveWorkspace(draft => ({...draft, activeApp: id}));
     }, [activeWorkspaceId]);
 
-    const openApp = useCallback((id: string, options: {folderId?: string} = {}) => {
+    const openApp = useCallback((id: string, options: {folderId?: string, fileId?: string} = {}) => {
         updateActiveWorkspace(draft => {
             const newMinimized = new Set(draft.minimizedApps);
             newMinimized.delete(id);
             const newOpen = draft.openApps.includes(id) ? draft.openApps : [...draft.openApps, id];
 
-            // FIX: Pass folderId to File Explorer via window state.
             let newWindowStates = { ...draft.windowStates };
             if (id === 'file-explorer' && options.folderId) {
                 const currentFEState = newWindowStates['file-explorer'] || {};
@@ -327,6 +327,17 @@ const App: React.FC = () => {
                     'file-explorer': {
                         ...currentFEState,
                         folderId: options.folderId,
+                    }
+                };
+            }
+            
+            if (id === 'file-viewer' && options.fileId) {
+                const currentFVState = newWindowStates['file-viewer'] || {};
+                newWindowStates = {
+                    ...newWindowStates,
+                    'file-viewer': {
+                        ...currentFVState,
+                        fileId: options.fileId,
                     }
                 };
             }
@@ -339,7 +350,6 @@ const App: React.FC = () => {
                 windowStates: newWindowStates
             };
         });
-        // Note: Folder opening logic needs to be handled inside the component
     }, [activeWorkspaceId]);
 
     const executeShortcut = useCallback((action: ShortcutAction) => {
@@ -646,11 +656,12 @@ const App: React.FC = () => {
         
         switch (app.id) {
             case 'webapps-store': return <WebApps connectedApps={connectedWebApps} setConnectedApps={setConnectedWebApps} />;
-            case 'file-explorer': return <FileExplorer setContextMenu={setContextMenu} pinnedFolders={pinnedFolders} onTogglePin={handleTogglePinFolder} />;
+            case 'file-explorer': return <FileExplorer setContextMenu={setContextMenu} pinnedFolders={pinnedFolders} onTogglePin={handleTogglePinFolder} openApp={openApp} />;
             case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} dockOrder={dockOrder} setDockOrder={setDockOrder} />;
             case 'todo': return <ToDo />;
             case 'browser': return <Browser />;
             case 'media-player': return <MediaPlayer files={mockFiles} folders={mockFolders} mediaState={mediaState} onPlayTrack={handlePlayTrack} onTogglePlay={handleTogglePlay} onPlayNext={handlePlayNext} onPlayPrev={handlePlayPrev} />;
+            case 'file-viewer': return <FileViewer files={mockFiles} folders={mockFolders} />;
             case 'user-profile': return <UserProfile userProfile={userProfile} setUserProfile={setUserProfile} setUserPassword={setUserPassword} />;
             case 'secret-terminal': return <Terminal userProfile={userProfile} onClose={() => closeApp('secret-terminal')} />;
             default: return <ComingSoon app={app} />;
@@ -728,7 +739,6 @@ const App: React.FC = () => {
                         files={mockFiles}
                         folders={mockFolders}
                         onClose={() => setIsSearchOpen(false)}
-                        // FIX: Update onOpenApp to pass options to openApp, enabling folder navigation from search.
                         onOpenApp={(appId, options) => {
                             openApp(appId, options);
                             setIsSearchOpen(false);

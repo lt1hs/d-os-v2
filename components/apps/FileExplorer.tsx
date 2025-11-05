@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-// FIX: Import WindowState type to use as a prop for initial state.
 import { ContextMenuItem, WindowState } from '../../types';
 import { mockFolders, mockFiles, CloudFile, CloudFolder, SyncStatus, FileType } from '../../constants';
 
@@ -9,6 +8,7 @@ interface FileExplorerProps {
     pinnedFolders: string[];
     onTogglePin: (folderId: string) => void;
     initialState?: WindowState;
+    openApp: (appId: string, options?: { folderId?: string; fileId?: string }) => void;
 }
 
 const SyncStatusIcon: React.FC<{ status: SyncStatus }> = ({ status }) => {
@@ -68,17 +68,14 @@ const RenameInput: React.FC<{ item: { id: string, name: string }, onRename: (id:
     );
 };
 
-export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinnedFolders, onTogglePin, initialState }) => {
+export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinnedFolders, onTogglePin, initialState, openApp }) => {
     const [folders, setFolders] = useState<CloudFolder[]>(mockFolders);
     const [files, setFiles] = useState<CloudFile[]>(mockFiles);
-    // FIX: Initialize current folder based on the initialState prop.
     const [currentFolderId, setCurrentFolderId] = useState(initialState?.folderId || 'root');
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const [renamingItem, setRenamingItem] = useState<{ id: string; name: string; } | null>(null);
 
-    // FIX: Add an effect to handle navigation when the initial folder state changes.
     useEffect(() => {
         if (initialState?.folderId && initialState.folderId !== currentFolderId) {
             setCurrentFolderId(initialState.folderId);
@@ -147,9 +144,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinn
 
     const handleDoubleClick = (item: CloudFile | CloudFolder) => {
         if (isCloudFile(item)) {
-            if (item.type === 'image' || item.type === 'video') {
-                setPreviewItem(item);
-            }
+            openApp('file-viewer', { fileId: item.id });
         } else {
             setCurrentFolderId(item.id);
         }
@@ -285,16 +280,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinn
                     {currentItems.length === 0 && <div className="flex items-center justify-center h-full text-white/50">This folder is empty.</div>}
                 </div>
             </main>
-            
-            {previewItem && (
-                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center animate-fade-in" onClick={() => setPreviewItem(null)}>
-                    <div className="max-w-4xl max-h-[80vh] bg-canvas-bg rounded-lg shadow-lg relative p-4" onClick={e => e.stopPropagation()}>
-                        {previewItem.type === 'image' && <img src={previewItem.url} alt={previewItem.name} className="max-w-full max-h-full object-contain"/>}
-                        {previewItem.type === 'video' && <video src={previewItem.url} controls autoPlay className="max-w-full max-h-full"/>}
-                        <button onClick={() => setPreviewItem(null)} className="absolute -top-3 -right-3 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"><i className="fi fi-rr-cross-small"></i></button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

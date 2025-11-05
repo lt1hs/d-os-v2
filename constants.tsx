@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { AppDefinition, CloudFile, CloudFolder, FileType, SyncStatus } from './types';
 
@@ -54,6 +55,11 @@ export const APPS: AppDefinition[] = [
         id: 'media-player',
         name: 'Media Player',
         icon: <i className="fi fi-rr-play-circle" />,
+    },
+    {
+        id: 'file-viewer',
+        name: 'File Viewer',
+        icon: <i className="fi fi-rr-eye" />,
     },
     {
         id: 'webapps-store',
@@ -126,4 +132,6 @@ export const mockFiles: CloudFile[] = [
     { id: 'f4', name: 'influencer-collab.jpeg', type: 'image', parentId: '4', size: '1.9 MB', modified: '2023-10-24', syncStatus: 'local', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg' },
     { id: 'f5', name: 'summer-sale.mp4', type: 'video', parentId: '2', size: '22.3 MB', modified: '2023-10-23', syncStatus: 'cloud', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
     { id: 'f6', name: 'sample-tune.mp3', type: 'audio', parentId: 'root', size: '9.1 MB', modified: '2023-10-22', syncStatus: 'local', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+    { id: 'f7', name: 'README.md', type: 'document', parentId: 'root', size: '1 KB', modified: '2023-10-28', syncStatus: 'local', content: '# Project Readme\n\nThis is a sample readme file for the AI Studio OS.\n\n- Feature A\n- Feature B\n\n```javascript\nconsole.log("Hello, World!");\n```' },
+    { id: 'f8', name: 'notes.txt', type: 'document', parentId: '3', size: '0.5 KB', modified: '2023-10-28', syncStatus: 'local', content: 'Meeting notes:\n- Discuss Q4 roadmap\n- Finalize budget for new campaign\n- Onboarding for new hires' },
 ];

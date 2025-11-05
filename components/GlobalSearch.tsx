@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-// FIX: Update onOpenApp prop to support opening folders in File Explorer.
 import { AppDefinition, Project, CloudFile, CloudFolder, SearchResult, WindowState } from '../types';
 
 interface GlobalSearchProps {
@@ -8,7 +7,7 @@ interface GlobalSearchProps {
     files: CloudFile[];
     folders: CloudFolder[];
     onClose: () => void;
-    onOpenApp: (appId: string, options?: { folderId?: string }) => void;
+    onOpenApp: (appId: string, options?: { folderId?: string, fileId?: string }) => void;
     onOpenProject: (appId: string, projectId: string) => void;
 }
 
@@ -104,8 +103,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = (props) => {
                     name: file.name,
                     description: 'File',
                     icon: getFileIcon(file.type),
-                    // FIX: The onOpenApp call now matches the updated prop type, allowing folder navigation.
-                    action: () => onOpenApp('file-explorer', { folderId: file.parentId || 'root' })
+                    action: () => onOpenApp('file-viewer', { fileId: file.id })
                 });
             }
         });
@@ -119,7 +117,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = (props) => {
                     name: folder.name,
                     description: 'Folder',
                     icon: getFileIcon('folder'),
-                    // FIX: The onOpenApp call now matches the updated prop type, allowing folder navigation.
                     action: () => onOpenApp('file-explorer', { folderId: folder.id })
                 });
             }

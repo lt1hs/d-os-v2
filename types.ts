@@ -23,6 +23,7 @@ export interface CloudFile {
   modified: string;
   syncStatus: SyncStatus;
   url?: string;
+  content?: string;
 }
 
 export interface CloudFolder {
@@ -59,6 +60,7 @@ export interface WindowState {
     height?: number;
     // FIX: Add optional folderId to allow passing navigation context to apps.
     folderId?: string;
+    fileId?: string;
 }
 
 export interface Workspace {
@@ -114,6 +116,7 @@ export type ShortcutAction =
   | 'openApp:todo'
   | 'openApp:media-player'
   | 'openApp:file-explorer'
+  | 'openApp:file-viewer'
   | 'openApp:settings'
   | 'openApp:secret-terminal';
 

@@ -33,6 +33,8 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
     'openApp:todo': 'mod+8',
     'openApp:media-player': 'mod+m',
     'openApp:file-explorer': '',
+    // FIX: Add missing 'openApp:file-viewer' to satisfy ShortcutMap type.
+    'openApp:file-viewer': '',
     'openApp:settings': '',
     'openApp:secret-terminal': 'mod+t',
 };
