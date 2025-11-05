@@ -1,8 +1,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { ContextMenuItem, WindowState } from '../../types';
-import { mockFolders, mockFiles } from '../../constants';
-import { CloudFile, CloudFolder, SyncStatus, FileType } from '../../types';
+import { mockFolders, mockFiles, CloudFile, CloudFolder, SyncStatus, FileType } from '../../constants';
 
 interface FileExplorerProps {
     setContextMenu: (menu: { x: number; y: number; items: ContextMenuItem[] } | null) => void;
