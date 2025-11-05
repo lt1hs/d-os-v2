@@ -278,11 +278,19 @@ export const generateSpeech = async (prompt: string, voice: string): Promise<str
     }
 };
 
-export const generatePodcastScript = async (topic: string, speakers: string[]): Promise<string> => {
+export const generatePodcastScript = async (topic: string, speakers: string[], style: string, duration: number): Promise<string> => {
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-pro',
-            contents: `Generate a short podcast script on the topic "${topic}". The speakers are: ${speakers.join(', ')}. Format the script as "SPEAKER_NAME: Dialogue text" with each line of dialogue on a new line. Include an intro and outro.`,
+            contents: `Generate a podcast script.
+            - Topic/Content: "${topic}"
+            - Style: "${style}"
+            - Desired Duration: Approximately ${duration} minutes.
+            - Speakers: ${speakers.join(', ')}.
+
+            Format the script strictly as "SPEAKER_NAME: Dialogue text", with each line of dialogue on a new line.
+            Ensure the script includes a clear intro and outro suitable for the style.
+            The total length should be appropriate for a ${duration}-minute podcast.`,
         });
         return response.text;
     } catch (error) {

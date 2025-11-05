@@ -42,8 +42,19 @@ export const Window: React.FC<WindowProps> = (props) => {
         };
     };
     
-    const [position, setPosition] = useState(initialState?.x !== undefined ? { x: initialState.x, y: initialState.y } : getCenteredPosition(initialState || DEFAULT_SIZE));
-    const [size, setSize] = useState(initialState?.width !== undefined ? { width: initialState.width, height: initialState.height } : DEFAULT_SIZE);
+    // FIX: Correctly initialize window position and size from potentially partial state.
+    // This resolves the TypeScript error by ensuring getCenteredPosition always receives a complete size object,
+    // and prevents bugs from partially defined position or size in the initial state.
+    const [position, setPosition] = useState(
+        initialState?.x !== undefined && initialState?.y !== undefined
+            ? { x: initialState.x, y: initialState.y }
+            : getCenteredPosition({ ...DEFAULT_SIZE, ...(initialState || {}) })
+    );
+    const [size, setSize] = useState(
+        initialState?.width !== undefined && initialState?.height !== undefined
+            ? { width: initialState.width, height: initialState.height }
+            : DEFAULT_SIZE
+    );
     
     const [preSnapState, setPreSnapState] = useState<{ pos: {x:number, y:number}, size: {width:number, height:number} } | null>(null);
     const [isSnapped, setIsSnapped] = useState(false);
