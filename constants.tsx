@@ -3,8 +3,6 @@
 import React from 'react';
 import { AppDefinition, CloudFile, CloudFolder, FileType, SyncStatus } from './types';
 
-// FIX: Re-export types to be used in other components that import from this file.
-export type { CloudFile, CloudFolder, FileType, SyncStatus };
 
 export const AIStudioLogo = () => <i className="fi fi-rr-transform" />;
 
