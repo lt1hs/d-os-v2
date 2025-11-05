@@ -153,7 +153,7 @@ export const DesignStudio: React.FC<CreativeAppProps> = (props) => {
 
     return (
         <div className="flex h-full w-full gap-4 text-white/90 p-4">
-            <button onClick={() => onSetActiveProjectId(appId, null)} className="absolute top-12 left-2 text-xs px-2 py-1 bg-black/30 rounded-full z-10 hover:bg-black/50">&lt; Back to Projects</button>
+            <button onClick={() => onSetActiveProjectId(appId, null)} className="absolute top-2 left-2 z-10 flex items-center gap-2 text-xs px-3 py-1.5 bg-dock-bg backdrop-blur-md border border-border-color rounded-full hover:bg-white/20 transition-colors font-sans"><i className="fi fi-rr-arrow-left text-xs" /> Back to Projects</button>
             <div className="w-1/4 min-w-[280px] flex flex-col gap-4">
                 <h3 className="text-lg font-semibold pt-6">{activeProject.name}</h3>
                 <div className="bg-white/5 p-3 rounded-lg border border-border-color flex-grow flex flex-col">

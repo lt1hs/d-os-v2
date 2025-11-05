@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { CreativeAppProps } from '../../types';
 import { ProjectSelectionScreen } from '../ProjectSelectionScreen';
@@ -202,7 +201,7 @@ export const CodeStudio: React.FC<CreativeAppProps> = (props) => {
 
     return (
         <div className="flex h-full w-full bg-[#1e2738] font-mono text-sm text-[#d4d4d4] rounded-b-lg">
-            <button onClick={() => onSetActiveProjectId(appId, null)} className="absolute top-12 left-2 text-xs px-2 py-1 bg-black/30 rounded-full z-20 hover:bg-black/50 font-sans">&lt; Back to Projects</button>
+            <button onClick={() => onSetActiveProjectId(appId, null)} className="absolute top-2 left-2 z-20 flex items-center gap-2 text-xs px-3 py-1.5 bg-dock-bg backdrop-blur-md border border-border-color rounded-full hover:bg-white/20 transition-colors font-sans"><i className="fi fi-rr-arrow-left text-xs" /> Back to Projects</button>
             
             {/* Sidebar */}
             <aside className="w-56 flex-shrink-0 bg-[#252526] p-2 border-r border-white/10 flex flex-col">
