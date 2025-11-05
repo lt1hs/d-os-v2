@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Workspace, AppDefinition, Notification, UserProfileState } from '../types';
+import { Workspace, AppDefinition, Notification, UserProfileState, MediaState } from '../types';
 
 interface TopBarProps {
     workspaces: Workspace[];
@@ -14,6 +13,10 @@ interface TopBarProps {
     onToggleNotifications: () => void;
     userProfile: UserProfileState;
     onOpenApp: (id: string) => void;
+    mediaState: MediaState;
+    onTogglePlay: () => void;
+    onPlayNext: () => void;
+    onPlayPrev: () => void;
 }
 
 const createDefaultWorkspaceState = () => ({
@@ -24,7 +27,26 @@ const createDefaultWorkspaceState = () => ({
     windowStates: {},
 });
 
-export const TopBar: React.FC<TopBarProps> = ({ workspaces, setWorkspaces, activeWorkspaceId, setActiveWorkspaceId, activeAppId, allApps, onToggleAgent, notifications, onToggleNotifications, userProfile, onOpenApp }) => {
+const MediaControls: React.FC<Pick<TopBarProps, 'mediaState' | 'onTogglePlay' | 'onPlayNext' | 'onPlayPrev'>> = ({ mediaState, onTogglePlay, onPlayNext, onPlayPrev }) => {
+    if (!mediaState.currentTrack) return null;
+
+    return (
+        <div className="flex items-center gap-2 h-10 px-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-lg animate-fade-in">
+            <div className="text-xl">
+                {mediaState.currentTrack.type === 'audio' ? <i className="fi fi-rr-music-alt" /> : <i className="fi fi-rr-film" />}
+            </div>
+            <span className="text-xs truncate max-w-[120px]">{mediaState.currentTrack.name}</span>
+            <div className="w-px h-5 bg-white/20 mx-1" />
+            <button onClick={onPlayPrev} className="p-1 rounded-full hover:bg-white/10"><i className="fi fi-rr-backward"/></button>
+            <button onClick={onTogglePlay} className="p-1 rounded-full hover:bg-white/10 text-lg">{mediaState.isPlaying ? <i className="fi fi-rr-pause"/> : <i className="fi fi-rr-play"/>}</button>
+            <button onClick={onPlayNext} className="p-1 rounded-full hover:bg-white/10"><i className="fi fi-rr-forward"/></button>
+        </div>
+    );
+};
+
+
+export const TopBar: React.FC<TopBarProps> = (props) => {
+    const { workspaces, setWorkspaces, activeWorkspaceId, setActiveWorkspaceId, activeAppId, allApps, onToggleAgent, notifications, onToggleNotifications, userProfile, onOpenApp, mediaState } = props;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [newName, setNewName] = useState('');
@@ -94,8 +116,9 @@ export const TopBar: React.FC<TopBarProps> = ({ workspaces, setWorkspaces, activ
                 </div>
             </div>
 
-            {/* Center Pill */}
-            <div className="absolute left-1/2 -translate-x-1/2">
+            {/* Center Pills */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+                 <MediaControls {...props} />
                 <div className="relative" ref={menuRef}>
                     <button onClick={() => setIsMenuOpen(p => !p)} className="flex items-center gap-2 h-10 px-4 bg-black/40 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/20 transition-colors shadow-lg">
                         <span>{activeWorkspace?.name || 'Workspaces'}</span>

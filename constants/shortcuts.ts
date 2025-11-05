@@ -31,6 +31,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
     'openApp:webapps-store': 'mod+7',
     'openApp:browser': 'mod+b',
     'openApp:todo': 'mod+8',
+    'openApp:media-player': 'mod+m',
     'openApp:file-explorer': '',
     'openApp:settings': '',
     'openApp:secret-terminal': 'mod+t',

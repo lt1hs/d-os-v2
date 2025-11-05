@@ -1,7 +1,9 @@
 
-
 import React from 'react';
-import { AppDefinition } from './types';
+import { AppDefinition, CloudFile, CloudFolder, FileType, SyncStatus } from './types';
+
+// FIX: Re-export types to be used in other components that import from this file.
+export type { CloudFile, CloudFolder, FileType, SyncStatus };
 
 export const AIStudioLogo = () => <i className="fi fi-rr-transform" />;
 
@@ -47,6 +49,11 @@ export const APPS: AppDefinition[] = [
         id: 'code-studio',
         name: 'Code Studio',
         icon: <i className="fi fi-rr-file-code" />,
+    },
+    {
+        id: 'media-player',
+        name: 'Media Player',
+        icon: <i className="fi fi-rr-play-circle" />,
     },
     {
         id: 'webapps-store',
@@ -104,28 +111,6 @@ export const WEB_APPS = [
     { id: 'canva', name: 'Canva', category: 'Design', description: 'Seamlessly move between Canva and AI Studio.', icon: <i className="fi fi-rr-picture" /> },
 ];
 
-// File System Data
-export type SyncStatus = 'local' | 'cloud' | 'syncing';
-export type FileType = 'image' | 'video' | 'document';
-
-export interface CloudFile {
-  id: string;
-  name: string;
-  type: FileType;
-  parentId: string | null;
-  size: string;
-  modified: string;
-  syncStatus: SyncStatus;
-  url?: string;
-}
-
-export interface CloudFolder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  syncStatus: SyncStatus;
-}
-
 export const mockFolders: CloudFolder[] = [
     { id: 'root', name: 'Cloud Drive', parentId: null, syncStatus: 'local' },
     { id: '1', name: 'Generated Images', parentId: 'root', syncStatus: 'local' },
@@ -140,4 +125,5 @@ export const mockFiles: CloudFile[] = [
     { id: 'f3', name: 'product-launch.jpeg', type: 'image', parentId: '1', size: '3.4 MB', modified: '2023-10-25', syncStatus: 'syncing', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg' },
     { id: 'f4', name: 'influencer-collab.jpeg', type: 'image', parentId: '4', size: '1.9 MB', modified: '2023-10-24', syncStatus: 'local', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg' },
     { id: 'f5', name: 'summer-sale.mp4', type: 'video', parentId: '2', size: '22.3 MB', modified: '2023-10-23', syncStatus: 'cloud', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
+    { id: 'f6', name: 'sample-tune.mp3', type: 'audio', parentId: 'root', size: '9.1 MB', modified: '2023-10-22', syncStatus: 'local', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
 ];

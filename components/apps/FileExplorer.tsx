@@ -24,6 +24,7 @@ const FileTypeIcon: React.FC<{ type: FileType | 'folder', sizeClass?: string }> 
         case 'folder': return <i className={`fi fi-rr-folder text-amber-400 ${sizeClass} ${baseClass}`}></i>;
         case 'image': return <i className={`fi fi-rr-picture text-purple-400 ${sizeClass} ${baseClass}`}></i>;
         case 'video': return <i className={`fi fi-rr-film text-red-400 ${sizeClass} ${baseClass}`}></i>;
+        case 'audio': return <i className={`fi fi-rr-music-alt text-cyan-400 ${sizeClass} ${baseClass}`}></i>;
         case 'document': return <i className={`fi fi-rr-document text-blue-400 ${sizeClass} ${baseClass}`}></i>;
         default: return <i className={`fi fi-rr-file text-gray-400 ${sizeClass} ${baseClass}`}></i>;
     }

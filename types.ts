@@ -11,6 +11,34 @@ declare global {
   }
 }
 
+export type SyncStatus = 'local' | 'cloud' | 'syncing';
+export type FileType = 'image' | 'video' | 'document' | 'audio';
+
+export interface CloudFile {
+  id: string;
+  name: string;
+  type: FileType;
+  parentId: string | null;
+  size: string;
+  modified: string;
+  syncStatus: SyncStatus;
+  url?: string;
+}
+
+export interface CloudFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  syncStatus: SyncStatus;
+}
+
+export interface MediaState {
+    isPlaying: boolean;
+    currentTrack: CloudFile | null;
+    playlist: CloudFile[];
+    trackIndex: number;
+}
+
 export interface AppDefinition {
   id: string;
   name: string;
@@ -80,6 +108,7 @@ export type ShortcutAction =
   | 'openApp:webapps-store'
   | 'openApp:browser'
   | 'openApp:todo'
+  | 'openApp:media-player'
   | 'openApp:file-explorer'
   | 'openApp:settings'
   | 'openApp:secret-terminal';

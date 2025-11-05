@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dock } from './components/Dock';
 import { Window } from './components/Window';
@@ -19,8 +17,9 @@ import { ToDo } from './components/apps/ToDo';
 import { UserProfile } from './components/apps/UserProfile';
 import { Terminal } from './components/apps/Terminal';
 import { Browser } from './components/apps/Browser';
-import { AppDefinition, ContextMenuItem, Workspace, WindowSnapHint, SystemAction, ShortcutAction, ShortcutMap, Notification, UserProfileState, Project, CreativeAppProps, WindowState } from './types';
-import { APPS, SYSTEM_TOOLS, mockFolders } from './constants';
+import { MediaPlayer } from './components/apps/MediaPlayer';
+import { AppDefinition, ContextMenuItem, Workspace, WindowSnapHint, SystemAction, ShortcutAction, ShortcutMap, Notification, UserProfileState, Project, CreativeAppProps, WindowState, CloudFile, MediaState } from './types';
+import { APPS, SYSTEM_TOOLS, mockFolders, mockFiles } from './constants';
 import { THEME_SETTINGS, DEFAULT_THEME, Theme } from './constants/theme';
 import { StartMenu } from './components/StartMenu';
 import { LockScreen } from './components/LockScreen';
@@ -58,6 +57,14 @@ const App: React.FC = () => {
     // Session State (not persisted for security)
     const [userPassword, setUserPassword] = useState('password');
     const [activeProjects, setActiveProjects] = useState<Record<string, string | null>>({});
+    
+    // Global Media State
+    const [mediaState, setMediaState] = useState<MediaState>({
+        isPlaying: false,
+        currentTrack: null,
+        playlist: [],
+        trackIndex: -1,
+    });
 
     // Persistent State
     const [workspaces, setWorkspaces] = useState<Workspace[]>(() => {
@@ -292,7 +299,6 @@ const App: React.FC = () => {
         setNotifications([]);
     }, []);
 
-
     const bringToFront = useCallback((id: string) => {
         updateActiveWorkspace(draft => ({...draft, activeApp: id}));
     }, [activeWorkspaceId]);
@@ -347,7 +353,14 @@ const App: React.FC = () => {
         setIsStartMenuOpen(false);
     };
 
+    const handleStopMedia = () => {
+        setMediaState({ isPlaying: false, currentTrack: null, playlist: [], trackIndex: -1 });
+    };
+
     const closeApp = useCallback((id: string) => {
+        if (id === 'media-player') {
+            handleStopMedia();
+        }
         updateActiveWorkspace(draft => {
             const remaining = draft.openApps.filter(appId => appId !== id);
             const newMinimized = new Set(draft.minimizedApps);
@@ -534,6 +547,45 @@ const App: React.FC = () => {
             }
         }));
     };
+    
+    // Media Controls
+    const handleTogglePlay = () => {
+        if (mediaState.currentTrack) {
+            setMediaState(s => ({ ...s, isPlaying: !s.isPlaying }));
+        }
+    };
+
+    const handlePlayNext = () => {
+        if (mediaState.playlist.length === 0) return;
+        const nextIndex = (mediaState.trackIndex + 1) % mediaState.playlist.length;
+        setMediaState(s => ({
+            ...s,
+            trackIndex: nextIndex,
+            currentTrack: s.playlist[nextIndex],
+            isPlaying: true,
+        }));
+    };
+
+    const handlePlayPrev = () => {
+        if (mediaState.playlist.length === 0) return;
+        const prevIndex = (mediaState.trackIndex - 1 + mediaState.playlist.length) % mediaState.playlist.length;
+        setMediaState(s => ({
+            ...s,
+            trackIndex: prevIndex,
+            currentTrack: s.playlist[prevIndex],
+            isPlaying: true,
+        }));
+    };
+
+    const handlePlayTrack = (track: CloudFile, playlist: CloudFile[]) => {
+        const trackIndex = playlist.findIndex(t => t.id === track.id);
+        setMediaState({
+            playlist,
+            trackIndex,
+            currentTrack: track,
+            isPlaying: true,
+        });
+    };
 
 
     const renderAppComponent = (app: AppDefinition) => {
@@ -567,6 +619,7 @@ const App: React.FC = () => {
             case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} dockOrder={dockOrder} setDockOrder={setDockOrder} />;
             case 'todo': return <ToDo />;
             case 'browser': return <Browser />;
+            case 'media-player': return <MediaPlayer files={mockFiles} folders={mockFolders} mediaState={mediaState} onPlayTrack={handlePlayTrack} onTogglePlay={handleTogglePlay} onPlayNext={handlePlayNext} onPlayPrev={handlePlayPrev} />;
             case 'user-profile': return <UserProfile userProfile={userProfile} setUserProfile={setUserProfile} setUserPassword={setUserPassword} />;
             case 'secret-terminal': return <Terminal userProfile={userProfile} onClose={() => closeApp('secret-terminal')} />;
             default: return <ComingSoon app={app} />;
@@ -625,6 +678,10 @@ const App: React.FC = () => {
                     onToggleNotifications={() => setIsNotificationCenterOpen(p => !p)}
                     userProfile={userProfile}
                     onOpenApp={openApp}
+                    mediaState={mediaState}
+                    onTogglePlay={handleTogglePlay}
+                    onPlayNext={handlePlayNext}
+                    onPlayPrev={handlePlayPrev}
                 />
                 {isAgentOpen && (
                     <SystemAgent 
