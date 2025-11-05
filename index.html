@@ -23,6 +23,16 @@
             color: #e2e8f0;
             overflow: hidden;
         }
+        body.aurora-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #4c1d95, #020617);
+            background-size: 400% 400%;
+            animation: aurora 15s ease infinite;
+        }
+        @keyframes aurora {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         @keyframes glitch-anim-1 {
             0% { clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%); }
             100% { clip-path: polygon(0 40%, 100% 40%, 100% 100%, 0 100%); }
@@ -86,6 +96,7 @@
               'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
               'menu-pop-up': 'menuPopUp 0.3s ease-out',
               'pulse-dot': 'pulseDot 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'pulse-glow-indicator': 'pulseGlowIndicator 2s ease-in-out infinite',
             },
             keyframes: {
               fadeIn: {
@@ -116,6 +127,16 @@
               pulseDot: {
                 '0%, 100%': { transform: 'scale(1)', opacity: '1' },
                 '50%': { transform: 'scale(1.4)', opacity: '0.7' },
+              },
+              pulseGlowIndicator: {
+                '0%, 100%': {
+                    transform: 'scale(1)',
+                    boxShadow: '0 0 3px rgba(255,255,255,0.7), 0 0 6px rgba(255,255,255,0.5)'
+                },
+                '50%': {
+                    transform: 'scale(1.2)',
+                    boxShadow: '0 0 8px rgba(255,255,255,1), 0 0 15px rgba(255,255,255,0.7)'
+                },
               }
             }
           }

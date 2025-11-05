@@ -130,7 +130,7 @@ export const Dock: React.FC<DockProps> = (props) => {
                 ref={dockRef}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="flex items-center h-14 p-1 bg-dock-bg backdrop-blur-xl rounded-2xl shadow-dock border border-border-color space-x-1"
+                className="flex items-center h-14 p-1 bg-dock-bg backdrop-blur-xl rounded-3xl shadow-dock border border-border-color space-x-1"
             >
                 {/* Start Button */}
                 <DockIcon

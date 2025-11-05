@@ -45,12 +45,11 @@ export const DockIcon: React.FC<DockIconProps> = ({ app, onClick, onContextMenu,
             
             {/* Indicators */}
             <div 
-                className={`absolute -bottom-1 h-1 w-full flex justify-center items-center transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute -bottom-1.5 h-1.5 w-full flex justify-center items-center transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
             >
                 {isActive ? (
                     <div 
-                        className="h-full bg-white rounded-full shadow-[0_0_8px_white] transition-all duration-200 ease-out"
-                        style={{ width: `${5 + (scale - 1) * 10}px` }}
+                        className="w-1.5 h-1.5 bg-white rounded-full animate-pulse-glow-indicator"
                     />
                 ) : isMinimized ? (
                     <div className="w-2 h-1 bg-amber-400 rounded-full" />

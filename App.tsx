@@ -267,6 +267,12 @@ const App: React.FC = () => {
         const tintColor = THEME_SETTINGS.tintColors.find(c => c.name === theme.tintColor) || THEME_SETTINGS.tintColors[0];
         root.style.setProperty('--tint-color-rgb', tintColor.rgb);
 
+        const wallpaper = THEME_SETTINGS.wallpapers.find(w => w.name === theme.background);
+        if (wallpaper?.name === 'Aurora' && !theme.customBackgroundUrl) {
+            document.body.classList.add('aurora-bg');
+        } else {
+            document.body.classList.remove('aurora-bg');
+        }
     }, [theme]);
     
     useEffect(() => {
@@ -687,12 +693,13 @@ const App: React.FC = () => {
     
     const wallpaper = THEME_SETTINGS.wallpapers.find(w => w.name === theme.background);
     const backgroundUrl = theme.customBackgroundUrl || wallpaper?.url;
+    const isAurora = wallpaper?.name === 'Aurora' && !theme.customBackgroundUrl;
 
     return (
         <div className="w-screen h-screen overflow-hidden font-sans relative" onContextMenu={handleDesktopContextMenu}>
             {backgroundUrl === 'dynamic-ascii' ? (
                 <AsciiBackground />
-            ) : (
+            ) : !isAurora && (
                  <div
                     className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-500 z-0"
                     style={{
