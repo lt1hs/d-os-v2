@@ -52,10 +52,11 @@ export interface ContextMenuItem {
 }
 
 export interface WindowState {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    // FIX: Make position and size properties optional to allow partial state initialization.
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
     // FIX: Add optional folderId to allow passing navigation context to apps.
     folderId?: string;
 }

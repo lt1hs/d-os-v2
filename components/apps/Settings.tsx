@@ -111,7 +111,7 @@ const AppearanceSettings: React.FC<Pick<SettingsProps, 'theme' | 'setTheme'>> = 
             
             <div className="mb-8">
                 <h3 className="text-lg font-semibold mb-2">Accent Color</h3>
-                <p className="text-sm text-slate-400 mb-4">Choose a color to be used for highlights, selections, and buttons.</p>
+                <p className="text-sm text-slate-400 mb-4">Choose a color for highlights, selections, and buttons.</p>
                 <div className="flex flex-wrap gap-4">
                     {THEME_SETTINGS.accentColors.map(color => (
                         <button
@@ -130,6 +130,29 @@ const AppearanceSettings: React.FC<Pick<SettingsProps, 'theme' | 'setTheme'>> = 
                     ))}
                 </div>
             </div>
+
+            <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-2">System Tint</h3>
+                <p className="text-sm text-slate-400 mb-4">Select the base color for windows, docks, and other UI elements.</p>
+                <div className="flex flex-wrap gap-4">
+                    {THEME_SETTINGS.tintColors.map(color => (
+                        <button
+                            key={color.name}
+                            onClick={() => setTheme(t => ({ ...t, tintColor: color.name }))}
+                            className="w-10 h-10 rounded-full transition-transform duration-150 hover:scale-110 relative ring-2 ring-transparent focus:outline-none focus:ring-offset-2 focus:ring-offset-[#1e2738] focus:ring-white"
+                            style={{ backgroundColor: `rgb(${color.rgb})` }}
+                            aria-label={`Select ${color.name} system tint`}
+                        >
+                            {theme.tintColor === color.name && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full text-white text-xl">
+                                    <i className="fi fi-rr-check" />
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
         </div>
     );
 };

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dock } from './components/Dock';
 import { Window } from './components/Window';
@@ -256,10 +257,15 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const root = document.documentElement;
-        const color = THEME_SETTINGS.accentColors.find(c => c.name === theme.accentColor) || THEME_SETTINGS.accentColors[0];
-        root.style.setProperty('--accent-color', color.hex);
-        root.style.setProperty('--accent-color-hover', color.hoverHex);
-        root.style.setProperty('--accent-color-rgb', color.rgb);
+        
+        const accentColor = THEME_SETTINGS.accentColors.find(c => c.name === theme.accentColor) || THEME_SETTINGS.accentColors[0];
+        root.style.setProperty('--accent-color', accentColor.hex);
+        root.style.setProperty('--accent-color-hover', accentColor.hoverHex);
+        root.style.setProperty('--accent-color-rgb', accentColor.rgb);
+
+        const tintColor = THEME_SETTINGS.tintColors.find(c => c.name === theme.tintColor) || THEME_SETTINGS.tintColors[0];
+        root.style.setProperty('--tint-color-rgb', tintColor.rgb);
+
     }, [theme]);
     
     useEffect(() => {
@@ -319,7 +325,6 @@ const App: React.FC = () => {
                 newWindowStates = {
                     ...newWindowStates,
                     'file-explorer': {
-                        // @ts-ignore
                         ...currentFEState,
                         folderId: options.folderId,
                     }

@@ -16,6 +16,7 @@
             --accent-color: #3b82f6; /* brand-blue */
             --accent-color-rgb: 59, 130, 246;
             --accent-color-hover: #2563eb;
+            --tint-color-rgb: 30, 41, 59; /* Default to Slate */
         }
         body {
             background-color: #020617;
@@ -63,8 +64,8 @@
             },
             colors: {
               'canvas-bg': '#111827',
-              'dock-bg': 'rgba(28, 28, 38, 0.5)',
-              'window-bg': 'rgba(31, 41, 55, 0.6)',
+              'dock-bg': 'rgba(var(--tint-color-rgb), 0.5)',
+              'window-bg': 'rgba(var(--tint-color-rgb), 0.6)',
               'border-color': 'rgba(255, 255, 255, 0.1)',
               'brand-blue': 'var(--accent-color)',
               'brand-blue-hover': 'var(--accent-color-hover)',

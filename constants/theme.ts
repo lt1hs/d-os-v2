@@ -1,17 +1,20 @@
 export interface Theme {
     accentColor: string;
+    tintColor: string;
     background: string;
     customBackgroundUrl?: string | null;
 }
 
 export const DEFAULT_THEME: Theme = {
     accentColor: 'Blue',
+    tintColor: 'Slate',
     background: 'Aurora',
     customBackgroundUrl: null,
 };
 
 export interface ThemeSettings {
     accentColors: { name: string; hex: string; hoverHex: string; rgb: string; }[];
+    tintColors: { name: string; rgb: string; }[];
     wallpapers: { name: string; url: string; }[];
 }
 
@@ -23,6 +26,13 @@ export const THEME_SETTINGS: ThemeSettings = {
         { name: 'Purple', hex: '#8b5cf6', hoverHex: '#7c3aed', rgb: '139, 92, 246' },
         { name: 'Orange', hex: '#f97316', hoverHex: '#ea580c', rgb: '249, 115, 22' },
         { name: 'Teal', hex: '#14b8a6', hoverHex: '#0d9488', rgb: '20, 184, 166' },
+    ],
+    tintColors: [
+        { name: 'Slate', rgb: '30, 41, 59' }, // slate-800
+        { name: 'Stone', rgb: '39, 39, 42' }, // stone-800
+        { name: 'Sky', rgb: '14, 55, 96' },   // A darker sky blue
+        { name: 'Rose', rgb: '86, 17, 51' },  // A darker rose
+        { name: 'Mauve', rgb: '58, 26, 79' }, // A custom purple
     ],
     wallpapers: [
         {
