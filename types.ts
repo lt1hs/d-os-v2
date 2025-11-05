@@ -103,6 +103,7 @@ export type ShortcutAction =
   | 'openAgent'
   | 'lockScreen'
   | 'openSearch'
+  | 'openApp:agent-studio'
   | 'openApp:image-studio'
   | 'openApp:video-studio'
   | 'openApp:video-editor'
@@ -162,4 +163,28 @@ export interface SearchResult {
   description?: string;
   icon: React.ReactNode;
   action: () => void;
+}
+
+// Agent Studio Types
+export type AgentType = 'voice' | 'webchat' | 'social';
+
+export interface VoiceAgentConfig {
+  systemInstruction: string;
+  voice: string;
+  toolsEnabled: boolean;
+}
+
+export interface WebChatAgentConfig {
+  systemInstruction: string;
+  themeColor: string;
+  avatarUrl: string;
+  welcomeMessage: string;
+  position: 'bottom-right' | 'bottom-left';
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  type: AgentType;
+  config: VoiceAgentConfig | WebChatAgentConfig | {}; // Empty object for social for now
 }

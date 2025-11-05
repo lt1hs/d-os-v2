@@ -12,6 +12,11 @@ export const LockIcon = () => <i className="fi fi-rr-lock" />;
 
 export const APPS: AppDefinition[] = [
     {
+        id: 'agent-studio',
+        name: 'Agent Studio',
+        icon: <i className="fi fi-rr-head-side-thinking" />,
+    },
+    {
         id: 'image-studio',
         name: 'Image Studio',
         icon: <i className="fi fi-rr-images" />,

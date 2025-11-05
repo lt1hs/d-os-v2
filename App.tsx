@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dock } from './components/Dock';
 import { Window } from './components/Window';
@@ -11,6 +12,7 @@ import { CopyStudio } from './components/apps/CopyStudio';
 import { AudioStudio } from './components/apps/AudioStudio';
 import { PodcastStudio } from './components/apps/PodcastStudio';
 import { CodeStudio } from './components/apps/CodeStudio';
+import { AgentStudio } from './components/apps/AgentStudio';
 import { FileExplorer } from './components/apps/FileExplorer';
 import { Settings } from './components/apps/Settings';
 import { ComingSoon } from './components/apps/ComingSoon';
@@ -661,6 +663,7 @@ const App: React.FC = () => {
         }
         
         switch (app.id) {
+            case 'agent-studio': return <AgentStudio />;
             case 'webapps-store': return <WebApps connectedApps={connectedWebApps} setConnectedApps={setConnectedWebApps} />;
             case 'file-explorer': return <FileExplorer setContextMenu={setContextMenu} pinnedFolders={pinnedFolders} onTogglePin={handleTogglePinFolder} openApp={openApp} />;
             case 'settings': return <Settings theme={theme} setTheme={setTheme} dockSettings={dockSettings} setDockSettings={setDockSettings} collaborationSettings={collaborationSettings} setCollaborationSettings={setCollaborationSettings} fileSyncSettings={fileSyncSettings} setFileSyncSettings={setFileSyncSettings} shortcutMap={shortcutMap} setShortcutMap={setShortcutMap} dockOrder={dockOrder} setDockOrder={setDockOrder} />;

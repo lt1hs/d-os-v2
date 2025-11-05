@@ -48,7 +48,7 @@ export const Window: React.FC<WindowProps> = (props) => {
     const [position, setPosition] = useState(
         initialState?.x !== undefined && initialState?.y !== undefined
             ? { x: initialState.x, y: initialState.y }
-            : getCenteredPosition({ ...DEFAULT_SIZE, ...(initialState || {}) })
+            : getCenteredPosition({ ...DEFAULT_SIZE, ...initialState })
     );
     const [size, setSize] = useState(
         initialState?.width !== undefined && initialState?.height !== undefined
@@ -138,12 +138,10 @@ export const Window: React.FC<WindowProps> = (props) => {
         
         // FIX: Preserve additional state like folderId when updating window state.
         const stateToSave: WindowState = {
+            ...initialState,
             ...finalPosition,
             ...finalSize,
         };
-        if (initialState?.folderId) {
-            stateToSave.folderId = initialState.folderId;
-        }
         onStateChange(app.id, stateToSave);
         
         setIsDragging(false);

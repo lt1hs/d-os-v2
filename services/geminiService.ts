@@ -1,5 +1,6 @@
 
 
+
 import { GoogleGenAI, Modality, Type, FunctionDeclaration } from "@google/genai";
 
 if (!process.env.API_KEY) {
