@@ -9,6 +9,7 @@ interface TopBarProps {
     activeAppId: string;
     allApps: AppDefinition[];
     onToggleAgent: () => void;
+    onToggleSearch: () => void;
     notifications: Notification[];
     onToggleNotifications: () => void;
     userProfile: UserProfileState;
@@ -46,7 +47,7 @@ const MediaControls: React.FC<Pick<TopBarProps, 'mediaState' | 'onTogglePlay' | 
 
 
 export const TopBar: React.FC<TopBarProps> = (props) => {
-    const { workspaces, setWorkspaces, activeWorkspaceId, setActiveWorkspaceId, activeAppId, allApps, onToggleAgent, notifications, onToggleNotifications, userProfile, onOpenApp, mediaState } = props;
+    const { workspaces, setWorkspaces, activeWorkspaceId, setActiveWorkspaceId, activeAppId, allApps, onToggleAgent, onToggleSearch, notifications, onToggleNotifications, userProfile, onOpenApp, mediaState } = props;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [newName, setNewName] = useState('');
@@ -156,7 +157,7 @@ export const TopBar: React.FC<TopBarProps> = (props) => {
             {/* Right Pill */}
             <div className="flex items-center gap-3 h-10 px-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-lg">
                 <div className="flex items-center gap-3 text-lg text-white/80">
-                    <button className="p-1 rounded-full hover:bg-white/10 hover:text-white transition-colors"><i className="fi fi-rr-search"></i></button>
+                    <button onClick={onToggleSearch} className="p-1 rounded-full hover:bg-white/10 hover:text-white transition-colors"><i className="fi fi-rr-search"></i></button>
                     <button className="p-1 rounded-full hover:bg-white/10 hover:text-white transition-colors"><i className="fi fi-rr-wifi-alt"></i></button>
                     <button onClick={onToggleAgent} className="p-1 rounded-full hover:bg-white/10 hover:text-white transition-colors" aria-label="Open AI Agent">
                         <i className="fi fi-rr-sparkles"></i>

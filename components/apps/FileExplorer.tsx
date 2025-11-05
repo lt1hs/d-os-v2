@@ -1,12 +1,14 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { ContextMenuItem } from '../../types';
+// FIX: Import WindowState type to use as a prop for initial state.
+import { ContextMenuItem, WindowState } from '../../types';
 import { mockFolders, mockFiles, CloudFile, CloudFolder, SyncStatus, FileType } from '../../constants';
 
 interface FileExplorerProps {
     setContextMenu: (menu: { x: number; y: number; items: ContextMenuItem[] } | null) => void;
     pinnedFolders: string[];
     onTogglePin: (folderId: string) => void;
+    initialState?: WindowState;
 }
 
 const SyncStatusIcon: React.FC<{ status: SyncStatus }> = ({ status }) => {
@@ -66,14 +68,22 @@ const RenameInput: React.FC<{ item: { id: string, name: string }, onRename: (id:
     );
 };
 
-export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinnedFolders, onTogglePin }) => {
+export const FileExplorer: React.FC<FileExplorerProps> = ({ setContextMenu, pinnedFolders, onTogglePin, initialState }) => {
     const [folders, setFolders] = useState<CloudFolder[]>(mockFolders);
     const [files, setFiles] = useState<CloudFile[]>(mockFiles);
-    const [currentFolderId, setCurrentFolderId] = useState('root');
+    // FIX: Initialize current folder based on the initialState prop.
+    const [currentFolderId, setCurrentFolderId] = useState(initialState?.folderId || 'root');
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const [renamingItem, setRenamingItem] = useState<{ id: string; name: string; } | null>(null);
+
+    // FIX: Add an effect to handle navigation when the initial folder state changes.
+    useEffect(() => {
+        if (initialState?.folderId && initialState.folderId !== currentFolderId) {
+            setCurrentFolderId(initialState.folderId);
+        }
+    }, [initialState?.folderId, currentFolderId]);
 
     const currentItems = useMemo(() => {
         const foldersInCurrent = folders.filter(f => f.parentId === currentFolderId);

@@ -42,8 +42,8 @@ export const Window: React.FC<WindowProps> = (props) => {
         };
     };
     
-    const [position, setPosition] = useState(initialState ? { x: initialState.x, y: initialState.y } : getCenteredPosition(initialState || DEFAULT_SIZE));
-    const [size, setSize] = useState(initialState ? { width: initialState.width, height: initialState.height } : DEFAULT_SIZE);
+    const [position, setPosition] = useState(initialState?.x !== undefined ? { x: initialState.x, y: initialState.y } : getCenteredPosition(initialState || DEFAULT_SIZE));
+    const [size, setSize] = useState(initialState?.width !== undefined ? { width: initialState.width, height: initialState.height } : DEFAULT_SIZE);
     
     const [preSnapState, setPreSnapState] = useState<{ pos: {x:number, y:number}, size: {width:number, height:number} } | null>(null);
     const [isSnapped, setIsSnapped] = useState(false);
@@ -125,12 +125,20 @@ export const Window: React.FC<WindowProps> = (props) => {
             }
         }
         
-        onStateChange(app.id, { ...finalPosition, ...finalSize });
+        // FIX: Preserve additional state like folderId when updating window state.
+        const stateToSave: WindowState = {
+            ...finalPosition,
+            ...finalSize,
+        };
+        if (initialState?.folderId) {
+            stateToSave.folderId = initialState.folderId;
+        }
+        onStateChange(app.id, stateToSave);
         
         setIsDragging(false);
         setIsResizing(false);
         setSnapHint(null);
-    }, [app.id, rightOffset, position, size, isSnapped, topBarHeight, dockHeight, setSnapHint, onStateChange, isDragging]);
+    }, [app.id, rightOffset, position, size, isSnapped, topBarHeight, dockHeight, setSnapHint, onStateChange, isDragging, initialState]);
 
     const onResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         if (isMaximized) return;
@@ -198,7 +206,8 @@ export const Window: React.FC<WindowProps> = (props) => {
                 </div>
             </header>
             <div className="flex-grow relative" style={{ minHeight: 0 }}>
-                {children}
+                {/* FIX: Pass initialState to child components to provide context. */}
+                {React.cloneElement(React.Children.only(children) as React.ReactElement<any>, { initialState })}
             </div>
              <div 
                 className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"

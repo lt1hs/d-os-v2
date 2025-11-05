@@ -40,7 +40,7 @@ export interface MediaState {
 }
 
 export interface AppDefinition {
-  id: string;
+  id:string;
   name: string;
   icon: React.ReactNode;
 }
@@ -56,6 +56,8 @@ export interface WindowState {
     y: number;
     width: number;
     height: number;
+    // FIX: Add optional folderId to allow passing navigation context to apps.
+    folderId?: string;
 }
 
 export interface Workspace {
@@ -97,6 +99,7 @@ export type SystemAction = {
 export type ShortcutAction =
   | 'openAgent'
   | 'lockScreen'
+  | 'openSearch'
   | 'openApp:image-studio'
   | 'openApp:video-studio'
   | 'openApp:video-editor'
@@ -146,4 +149,13 @@ export interface CreativeAppProps {
   onCreateProject: (appId: string, name: string, initialData: any) => string;
   onDeleteProject: (projectId: string) => void;
   appDefinition: AppDefinition;
+}
+
+export interface SearchResult {
+  id: string;
+  type: 'app' | 'project' | 'file' | 'folder' | 'web';
+  name: string;
+  description?: string;
+  icon: React.ReactNode;
+  action: () => void;
 }

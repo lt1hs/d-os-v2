@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dock } from './components/Dock';
 import { Window } from './components/Window';
@@ -31,6 +32,7 @@ import { DEFAULT_SHORTCUTS } from './constants/shortcuts';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationHost } from './components/NotificationHost';
 import { AsciiBackground } from './components/AsciiBackground';
+import { GlobalSearch } from './components/GlobalSearch';
 
 const ALL_APPS = [...APPS, ...SYSTEM_TOOLS];
 const TOP_BAR_HEIGHT = 56;
@@ -53,6 +55,7 @@ const App: React.FC = () => {
     const [snapHint, setSnapHint] = useState<WindowSnapHint | null>(null);
     const [isAgentOpen, setIsAgentOpen] = useState(false);
     const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     // Session State (not persisted for security)
     const [userPassword, setUserPassword] = useState('password');
@@ -308,7 +311,28 @@ const App: React.FC = () => {
             const newMinimized = new Set(draft.minimizedApps);
             newMinimized.delete(id);
             const newOpen = draft.openApps.includes(id) ? draft.openApps : [...draft.openApps, id];
-            return {...draft, openApps: newOpen, minimizedApps: newMinimized, activeApp: id};
+
+            // FIX: Pass folderId to File Explorer via window state.
+            let newWindowStates = { ...draft.windowStates };
+            if (id === 'file-explorer' && options.folderId) {
+                const currentFEState = newWindowStates['file-explorer'] || {};
+                newWindowStates = {
+                    ...newWindowStates,
+                    'file-explorer': {
+                        // @ts-ignore
+                        ...currentFEState,
+                        folderId: options.folderId,
+                    }
+                };
+            }
+
+            return {
+                ...draft, 
+                openApps: newOpen, 
+                minimizedApps: newMinimized, 
+                activeApp: id,
+                windowStates: newWindowStates
+            };
         });
         // Note: Folder opening logic needs to be handled inside the component
     }, [activeWorkspaceId]);
@@ -320,6 +344,8 @@ const App: React.FC = () => {
             openApp(appId);
         } else if (action === 'openAgent') {
             setIsAgentOpen(p => !p);
+        } else if (action === 'openSearch') {
+            setIsSearchOpen(p => !p);
         } else if (action === 'lockScreen') {
             handleLock();
         }
@@ -674,6 +700,7 @@ const App: React.FC = () => {
                     activeAppId={activeApp}
                     allApps={ALL_APPS}
                     onToggleAgent={() => setIsAgentOpen(p => !p)}
+                    onToggleSearch={() => setIsSearchOpen(p => !p)}
                     notifications={notifications}
                     onToggleNotifications={() => setIsNotificationCenterOpen(p => !p)}
                     userProfile={userProfile}
@@ -687,6 +714,25 @@ const App: React.FC = () => {
                     <SystemAgent 
                         onClose={() => setIsAgentOpen(false)}
                         onExecuteAction={handleExecuteAction}
+                    />
+                )}
+                {isSearchOpen && (
+                    <GlobalSearch
+                        apps={ALL_APPS}
+                        projects={projects}
+                        files={mockFiles}
+                        folders={mockFolders}
+                        onClose={() => setIsSearchOpen(false)}
+                        // FIX: Update onOpenApp to pass options to openApp, enabling folder navigation from search.
+                        onOpenApp={(appId, options) => {
+                            openApp(appId, options);
+                            setIsSearchOpen(false);
+                        }}
+                        onOpenProject={(appId, projectId) => {
+                            openApp(appId);
+                            handleSetActiveProjectId(appId, projectId);
+                            setIsSearchOpen(false);
+                        }}
                     />
                 )}
                  {isNotificationCenterOpen && (
